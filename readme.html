@@ -25,6 +25,19 @@ python app.py</pre><p>Open <a href="http://127.0.0.1:8000">http://127.0.0.1:8000
 <h2>Why this is a challenging benchmark</h2><p>The videos were selected to be realistic and motion-rich rather than obvious failures. A system must distinguish subtle human-perceived anomalies from normal motion, then align an explanation with a small spatial region and temporal interval. The full zero-shot results reinforce the paper's reported difficulty gradient: classification is attainable for the strongest compact control, while precise explanation overlap and localization remain much harder.</p>
 <p>Object distortion dominates the normalized taxonomy (2,157 mapped occurrences), followed by sudden blurring (719), trajectory anomalies (617), and merging (434). This imbalance means overall performance can hide weaknesses on rare disappearance, redundant-object, and background-distortion cases; use the visualizer's category and source filters for qualitative auditing.</p>
 
+<h2>Completed lightweight Track-B benchmark</h2><p>Both pretrained spatial localizers completed the balanced 664-video test split without runtime errors using the same two-frame-per-video protocol. They detect still-image manipulation fingerprints rather than movement-centric perceived-fakeness traces, so these results measure out-of-domain transfer.</p>
+<table><tr><th>Model</th><th>Parameters / role</th><th>Accuracy</th><th>Fake acc.</th><th>Real acc.</th><th>BBox IoU ↑</th><th>BBox dist. ↓</th><th>Time dist. ↓</th></tr>
+<tr><td>TruFor</td><td>RGB + Noiseprint++ localizer</td><td class="best">47.590%</td><td class="best">1.205%</td><td class="best">93.976%</td><td class="best">13.962</td><td>22.791</td><td class="best">38.497</td></tr>
+<tr><td>IML-ViT</td><td>ViT-B manipulation localizer</td><td>45.181%</td><td>0.301%</td><td>90.060%</td><td>11.437</td><td class="best">20.801</td><td>40.914</td></tr></table>
+<p class="muted">Both rows cover 664 / 664 videos with zero runtime failures. Higher is better for accuracy and IoU; lower is better for normalized spatial and temporal distance.</p>
+
+<h3>Interpretation by model</h3><ul>
+<li><b>Both localizers overwhelmingly predict REAL.</b> TruFor produced 640 REAL predictions. The near-zero fake accuracy and high real accuracy expose a failure that overall accuracy alone would hide.</li>
+<li><b>TruFor is the stronger Track-B transfer baseline overall.</b> It has better classification, box overlap, and temporal distance, although 13.962 IoU is still weak alignment with expert traces.</li>
+<li><b>IML-ViT has a slightly better box-distance score but lower IoU.</b> Its box can be near the expert region while having the wrong size or shape; distance and overlap should therefore be read together.</li>
+<li><b>Temporal localization is coarse and derived.</b> The timestamp of the stronger of two sampled frames becomes the prediction. This is not native video temporal reasoning.</li></ul>
+<div class="note"><b>Review in the visualizer.</b> Select <code>trufor</code> or <code>iml-vit</code>. Expert boxes appear in red, model boxes in blue, with per-video IoU and time distance. SAME/DIFFERENT filters expose correct labels, REAL-biased failures, and localization overlap despite incorrect classification.</div>
+
 <h2>Completed lightweight Track-C benchmark</h2><p>All files below contain the complete balanced 664-video test split. These are pretrained, general-purpose video models used zero-shot in 4-bit form on a 6 GB RTX 1000 Ada laptop; they were not trained on DeepTraceReward. Consequently, the results measure transfer, not each architecture's fully fine-tuned ceiling.</p>
 <table><tr><th>Model</th><th>Parameters / role</th><th>Accuracy</th><th>Fake acc.</th><th>Real acc.</th><th>BBox IoU ↑</th><th>Time dist. ↓</th><th>Valid text</th></tr>
 <tr><td>Qwen2.5-VL-3B</td><td>3B, primary compact control</td><td class="best">66.566%</td><td class="best">56.928%</td><td>76.205%</td><td class="best">13.808</td><td class="best">57.026</td><td>661 / 664</td></tr>
@@ -64,19 +77,4 @@ python inference/evaluate_explanations.py predictions/qwen2.5-vl-3b-v2-test.json
 ├── static/index.html
 ├── videos/*.mp4
 └── real_videos/*.mp4</pre>
-<h2>Completed Track-B spatial-localization benchmark</h2><p>The final laptop-compatible shortlist is <b>TruFor</b> and <b>IML-ViT</b>. Both completed all 664 test videos without runtime errors using the same pretrained, two-frame-per-video protocol. These models were trained to find still-image manipulation fingerprints—not movement-centric human-perceived video traces—so the experiment measures out-of-domain transfer.</p>
-<table><tr><th>Model</th><th>Rows</th><th>Accuracy ↑</th><th>Fake acc. ↑</th><th>Real acc. ↑</th><th>BBox IoU ↑</th><th>BBox distance ↓</th><th>Time distance ↓</th></tr>
-<tr><td>TruFor</td><td>664 / 664</td><td class="best">47.590%</td><td class="best">1.205%</td><td class="best">93.976%</td><td class="best">13.962</td><td>22.791</td><td class="best">38.497</td></tr>
-<tr><td>IML-ViT</td><td>664 / 664</td><td>45.181%</td><td>0.301%</td><td>90.060%</td><td>11.437</td><td class="best">20.801</td><td>40.914</td></tr></table>
-
-<h3>How to read these results</h3><ul>
-<li><b>Neither model is a useful fake-video classifier without adaptation.</b> TruFor predicted REAL for 640 of 664 videos; the near-zero fake accuracy and high real accuracy reveal this bias. Reporting only overall accuracy would make that failure less obvious.</li>
-<li><b>TruFor is the stronger overall Track-B transfer baseline.</b> It has the better classification balance, box IoU, and temporal distance. Its 13.962 IoU is still low, showing that a generic manipulation heatmap rarely aligns closely with the expert's perceived-motion box.</li>
-<li><b>IML-ViT has slightly lower box-centre distance but poorer overlap.</b> A prediction can be spatially near the expert region while having the wrong size or shape, so distance and IoU must be read together.</li>
-<li><b>Temporal localization is derived and sparse.</b> Each model sees two uniformly sampled frames; the timestamp of the strongest frame becomes its predicted onset. The normalized time distance is therefore a coarse transfer baseline, not native video temporal reasoning.</li></ul>
-
-<div class="note"><b>Visualizer support.</b> Select <code>trufor</code> or <code>iml-vit</code> in Explore or Model performance. The detail view draws the expert box in red and the strongest model box in blue, then displays per-video IoU and temporal distance. Use SAME/DIFFERENT filters to expose correct labels, REAL-biased failures, and cases where localization overlaps despite an incorrect classification.</div>
-<p>DeCLIP and MVSS-Net remain excluded because their official pinned environments conflict with the required Python 3.14 stack. They were not replaced with unverified ports merely to enlarge the benchmark table.</p>
-<div class="warning"><b>Run sequentially.</b> Do not run TruFor and IML-ViT concurrently on this single 6 GB GPU. Use the validated two-frame protocol and finish one 664-video run before starting the other.</div><pre>python inference/evaluate_predictions.py predictions/trufor-track-b-test.jsonl
-python inference/evaluate_predictions.py predictions/iml-vit-track-b-test.jsonl</pre>
 <p><a href="/">← Open the explorer</a></p></body></html>
