@@ -1,0 +1,54 @@
+# DeepTraceReward dataset (download from Hugging Face; never commit locally)
+/all_data.json
+/videos/
+/real_videos/
+/__MACOSX/
+/*.zip
+/*.zip.*
+
+# Papers, third-party repositories, checkpoints, and model caches
+/*.pdf
+/third_party/
+*.bin
+*.ckpt
+*.onnx
+*.pt
+*.pth
+*.pth.tar
+*.safetensors
+/.cache/
+
+# Python and local environments
+__pycache__/
+*.py[cod]
+*.egg-info/
+.coverage
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+.env
+.env.*
+
+# Editor and operating-system files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+~$*
+.~lock.*
+
+# Generated pilots and presentation intermediates
+/predictions/*pilot*.jsonl
+/assets/slides/*
+!/assets/slides/DeepTrace_Explorer_Demo.mp4
+!/assets/slides/DeepTrace_Explorer_Demo.jpg
+/DeepTraceReward_Paper_Sharing_before_*.pptx
+
+# Logs and temporary files
+*.log
+*.tmp
+/tmp/

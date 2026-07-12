@@ -1,0 +1,28 @@
+{
+  "reference_coverage": {
+    "fake_trace_annotations": 440,
+    "written_reference_annotations": 277,
+    "fake_videos": 332,
+    "evaluable_fake_videos": 212,
+    "prediction_response_videos": 1
+  },
+  "annotation_macro": {
+    "rouge_l_f1": 0.0,
+    "token_f1": 0.0,
+    "content_f1": 0.0,
+    "artifact_category_f1": 0.0
+  },
+  "video_all_trace_mean": {
+    "rouge_l_f1": 0.0,
+    "token_f1": 0.0,
+    "content_f1": 0.0,
+    "artifact_category_f1": 0.0
+  },
+  "video_oracle_best_trace": {
+    "rouge_l_f1": 0.0,
+    "token_f1": 0.0,
+    "content_f1": 0.0,
+    "artifact_category_f1": 0.0
+  },
+  "metric_note": "Automatic overlap metrics are diagnostics, not a substitute for the paper's 0/0.5/1 GPT-4.1 or human correctness rubric. Oracle-best asks whether any one reference trace was matched; all-trace mean rewards coverage of every documented trace."
+}

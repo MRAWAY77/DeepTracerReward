@@ -1,0 +1,69 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DeepTrace Explorer — Dataset and Benchmark Report</title>
+<style>:root{--bg:#0d1117;--panel:#151b25;--line:#303848;--text:#dce3ed;--muted:#9aa7b8;--green:#6ee7b7;--red:#fb7185;--amber:#fbbf24}*{box-sizing:border-box}body{max-width:1100px;margin:40px auto;padding:0 22px;background:var(--bg);color:var(--text);font:16px/1.62 system-ui}h1,h2,h3{color:#fff;line-height:1.25}h2{margin-top:42px;border-bottom:1px solid var(--line);padding-bottom:8px}a{color:var(--green)}code,pre{background:#171d27;border:1px solid var(--line);border-radius:7px}code{padding:2px 5px}pre{padding:15px;overflow:auto}.hero,.note,.warning,.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}.hero{border-left:4px solid var(--green)}.note{border-left:4px solid var(--green)}.warning{border-left:4px solid var(--amber)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.card b{display:block;font-size:25px;color:#fff}.card span,.muted{color:var(--muted);font-size:13px}table{border-collapse:collapse;width:100%;display:block;overflow-x:auto}td,th{border:1px solid var(--line);padding:9px 11px;text-align:left;white-space:nowrap}th{background:#171d27}td.best{color:var(--green);font-weight:bold}td.bad{color:var(--red)}ul,ol{padding-left:24px}@media(max-width:650px){body{margin-top:20px}.grid{grid-template-columns:1fr 1fr}}</style></head><body>
+<h1>DeepTrace Explorer</h1>
+<div class="hero"><b>Local dataset visualizer and lightweight zero-shot video-VLM benchmark.</b> It joins every real and generated clip with metadata, expert fake-trace annotations, model responses, deterministic localization scores, and reference-text diagnostics.</div>
+
+<h2>Run the visualizer</h2><pre>conda activate deeptracereward
+python app.py</pre><p>Open <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>. Use <code>python app.py --port 8080</code> if port 8000 is occupied. The visualizer itself uses only the Python standard library; inference dependencies are separate.</p>
+
+<h2>What the interface can do</h2><table><tr><th>Page</th><th>Capability</th></tr>
+<tr><td>Explore</td><td>Browse all 6,636 unique videos; search IDs/prompts/sources; filter real/fake, split, generator, category, human-explanation availability, and typical/atypical model responses.</td></tr>
+<tr><td>Video detail</td><td>Play the clip, inspect metadata, compare selected model text with every human trace, seek to trace onset, and draw its bounding box only during the annotated interval.</td></tr>
+<tr><td>Dataset analytics</td><td>Inspect generator, split, duration, annotation multiplicity, explanation/tag missingness, and the normalized nine-category distribution.</td></tr>
+<tr><td>Model performance</td><td>Compare strict classification, confusion counts, generator-level accuracy, response coverage, explanation-reference metrics, inference latency histogram, and fitted latency curve.</td></tr>
+<tr><td>About</td><td>Read scope and category-normalization caveats.</td></tr></table>
+
+<h2>Dataset at a glance</h2><div class="grid">
+<div class="card"><span>Unique videos</span><b>6,636</b>3,318 fake + 3,318 real</div><div class="card"><span>JSON rows</span><b>7,652</b>Repeated rows represent traces</div><div class="card"><span>Expert traces</span><b>4,334</b>Across 3,318 generated videos</div><div class="card"><span>Written explanations</span><b>62.7%</b>2,716 trace explanations</div><div class="card"><span>Average video</span><b>5.78 s</b>Length-matched real controls</div><div class="card"><span>Test split</span><b>664</b>332 fake + 332 real</div></div>
+<p>The fake collection spans Pika 1.5, Kling 1.0/1.5, Gen-3, Mochi 1, MiniMax-Video-01, and Sora. Real controls come from LLaVA-Video-178K and were clipped to match the fake-video length distribution. The official unique-video split is 5,308 train, 664 validation, and 664 test.</p>
+
+<h2>Why the annotations are valuable</h2><p>This is substantially richer supervision than a binary real/fake label. An expert trace can identify <em>what</em> looked fake, <em>where</em> it appeared, and <em>when</em> it began and ended. A generated video can have multiple traces: 753 videos have two or more, with up to six traces on one video.</p>
+<ul><li>Experts performed frame-by-frame inspection in Labelbox and supplied temporally aware boxes, onset/offset, structured artifact tags, and natural-language descriptions.</li><li>Ambiguous cases were resolved collaboratively by majority consensus.</li><li>Each annotated video was reviewed by one or two additional annotators for cross-validation and bias reduction.</li><li>The source videos were manually filtered for high visual quality and meaningful motion, avoiding trivially degraded clips.</li><li>The released explanations were GPT-4-standardized to reduce linguistic inconsistency.</li></ul>
+<div class="warning"><b>Important quality caveat.</b> “Expert annotated” does not mean complete or objective ground truth. Explanation coverage is 62.7%; raw category tags are missing on many released rows; perceived fakeness is inherently subjective; and the paper does not report a conventional inter-annotator-agreement coefficient. The release is best described as <b>rich, quality-controlled human-perception supervision</b>, not flawless forensic truth.</div>
+
+<h2>Why this is a challenging benchmark</h2><p>The videos were selected to be realistic and motion-rich rather than obvious failures. A system must distinguish subtle human-perceived anomalies from normal motion, then align an explanation with a small spatial region and temporal interval. The full zero-shot results reinforce the paper's reported difficulty gradient: classification is attainable for the strongest compact control, while precise explanation overlap and localization remain much harder.</p>
+<p>Object distortion dominates the normalized taxonomy (2,157 mapped occurrences), followed by sudden blurring (719), trajectory anomalies (617), and merging (434). This imbalance means overall performance can hide weaknesses on rare disappearance, redundant-object, and background-distortion cases; use the visualizer's category and source filters for qualitative auditing.</p>
+
+<h2>Completed lightweight Track-C benchmark</h2><p>All files below contain the complete balanced 664-video test split. These are pretrained, general-purpose video models used zero-shot in 4-bit form on a 6 GB RTX 1000 Ada laptop; they were not trained on DeepTraceReward. Consequently, the results measure transfer, not each architecture's fully fine-tuned ceiling.</p>
+<table><tr><th>Model</th><th>Parameters / role</th><th>Accuracy</th><th>Fake acc.</th><th>Real acc.</th><th>BBox IoU ↑</th><th>Time dist. ↓</th><th>Valid text</th></tr>
+<tr><td>Qwen2.5-VL-3B</td><td>3B, primary compact control</td><td class="best">66.566%</td><td class="best">56.928%</td><td>76.205%</td><td class="best">13.808</td><td class="best">57.026</td><td>661 / 664</td></tr>
+<tr><td>VideoLLaMA3-2B</td><td>2B, same family as paper baseline</td><td>47.892%</td><td>10.542%</td><td class="best">85.241%</td><td>0.000</td><td>93.520</td><td>664 / 664</td></tr>
+<tr><td>SmolVLM2-500M</td><td>0.5B negative control</td><td>18.373%</td><td>15.361%</td><td>21.386%</td><td>0.000</td><td>100.000</td><td>600 / 664*</td></tr>
+<tr><td>Marlin-2B</td><td>2B temporal control</td><td class="bad">Not valid</td><td>—</td><td>—</td><td>—</td><td>—</td><td>1 / 664</td></tr></table>
+<p class="muted">*SmolVLM text was mostly label-only output: median one word, only 38 responses passed the basic substantive-length heuristic.</p>
+
+<h3>Interpretation by model</h3><ul>
+<li><b>Qwen2.5-VL-3B is the strongest usable lightweight baseline.</b> It gave balanced enough transfer to exceed chance, produced concrete text for 661 samples, and supplied valid boxes/times for 189 fake videos. However, 66.6% classification and low 13.8 IoU leave a large gap to reliable forensic grounding.</li>
+<li><b>VideoLLaMA3-2B has a strong REAL bias.</b> It predicted REAL 580 times, explaining its 85.2% real accuracy but only 10.5% fake accuracy. All 664 responses triggered at least one schema/semantic warning, and it produced no valid fake-video boxes. Fluency here must not be mistaken for correctness.</li>
+<li><b>SmolVLM2-500M confirms the lower capacity limit.</b> Its label compliance, classification, grounding, and explanations are inadequate for this task, so it is retained only as a negative control.</li>
+<li><b>Marlin-2B is an adapter/output failure, not a scientific model result.</b> 650 rows returned text with no recognizable REAL/FAKE label and 651 rows were recorded as runtime/parse errors. Its nominal 1.054% score should not be compared with the other models until the adapter is repaired and rerun.</li></ul>
+
+<h2>Explanation comparison against expert text</h2><p>The test set contains 440 fake-trace rows, but only 277 have a written reference, covering 212 of 332 fake videos. Missing predictions score zero. The table uses annotation-macro scores on a 0–100 scale.</p>
+<table><tr><th>Model</th><th>Response videos / 212</th><th>ROUGE-L F1</th><th>Token F1</th><th>Content F1</th><th>Artifact-category F1</th></tr>
+<tr><td>Qwen2.5-VL-3B</td><td>212</td><td class="best">11.03</td><td class="best">13.24</td><td class="best">4.74</td><td>7.10</td></tr>
+<tr><td>VideoLLaMA3-2B</td><td>212</td><td>10.33</td><td>12.77</td><td>3.62</td><td class="best">16.91</td></tr>
+<tr><td>SmolVLM2-500M</td><td>174</td><td>0.36</td><td>0.38</td><td>0.00</td><td>0.00</td></tr>
+<tr><td>Marlin-2B</td><td>1</td><td>0.00</td><td>0.00</td><td>0.00</td><td>0.00</td></tr></table>
+<p>These low scores support the conclusion that the expert descriptions are specific and difficult for untuned compact VLMs to reproduce. They do <b>not</b> independently prove that every reference is correct: lexical overlap penalizes valid paraphrases, while category keywords can reward generic artifact language. Use the dashboard's all-trace mean and oracle-best view, then perform a stratified human audit with the paper's 0 / 0.5 / 1 explanation rubric.</p>
+
+<h2>Reproduce the evaluation</h2><pre>conda activate deeptracereward
+
+python inference/evaluate_predictions.py predictions/qwen2.5-vl-3b-v2-test.jsonl
+python inference/evaluate_explanations.py predictions/qwen2.5-vl-3b-v2-test.jsonl \
+  --output predictions/qwen2.5-vl-3b-v2-test-explanations.json</pre><p>Repeat with <code>videollama3-2b</code> and <code>marlin-2b</code>. Classification/localization evaluation and explanation evaluation are separate because they answer different questions.</p>
+
+<h2>Interpretation and implementation caveats</h2><ul><li>The nine dashboard categories are heuristic mappings from noisy, multi-label release tags; they are exploratory, not a lossless official relabeling.</li><li>Never split or count by annotation row: repeated rows from one fake video would leak the same video across evaluation units.</li><li>Automatic explanation similarity measures reference agreement, not visual faithfulness. A model can mention the right artifact without actually grounding it in the video.</li><li>The latency bell curve describes runtime distribution. Classification accuracy is categorical and should be read through confusion counts and per-source bars.</li><li>Predictions are loaded from JSONL automatically. Restart the server after changing Python/HTML; newly appended prediction rows are discovered without rebuilding the dataset.</li></ul>
+
+<h2>Expected layout</h2><pre>RewardData/
+├── app.py
+├── all_data.json
+├── readme.html
+├── inference/
+├── predictions/*.jsonl
+├── static/index.html
+├── videos/*.mp4
+└── real_videos/*.mp4</pre>
+<h2>Track B spatial-localization runs</h2><p>The final laptop-compatible shortlist is <b>TruFor</b> and <b>IML-ViT</b>. DeCLIP and MVSS-Net are excluded because their official pinned environments conflict with the required Python 3.14 stack. Track-B JSONL files appear automatically in Explore and Model performance. The strongest sampled-frame prediction is drawn in blue against the expert trace in red; the performance page reports strict box IoU, box distance, time distance, valid-localization coverage, confusion counts, generator breakdown, and latency.</p><div class="warning"><b>Run sequentially.</b> Do not run TruFor and IML-ViT concurrently on this single 6 GB GPU. Both launch a fresh worker per video and can overlap checkpoint loading, causing CUDA/driver failure. Use the validated two-frame protocol and finish one 664-video run before starting the other.</div><pre>python inference/evaluate_predictions.py predictions/trufor-track-b-test.jsonl
+python inference/evaluate_predictions.py predictions/iml-vit-track-b-test.jsonl</pre>
+<p><a href="/">← Open the explorer</a></p></body></html>

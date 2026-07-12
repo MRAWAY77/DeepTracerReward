@@ -1,0 +1,15 @@
+torch
+torchvision
+transformers>=5.7
+accelerate
+bitsandbytes
+pillow
+safetensors
+qwen-vl-utils>=0.0.14
+torchcodec
+av
+opencv-python-headless
+decord
+ffmpeg-python
+imageio
+tqdm
