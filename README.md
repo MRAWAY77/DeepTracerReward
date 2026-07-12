@@ -11,6 +11,8 @@ It provides:
 - lightweight Track B localizers and Track C video-VLM inference runners; and
 - the paper-sharing deck and a recorded explorer walkthrough.
 
+**Presentation:** [Download the PowerPoint deck](assets/presentation/DeepTraceReward_Paper_Sharing.pptx)
+
 The original videos, annotations, third-party model repositories, and checkpoints
 are deliberately not committed. They remain governed by their original licenses.
 
@@ -126,7 +128,7 @@ it is not a valid benchmark result.
 | `inference/evaluate_predictions.py` | Strict task and grounding metrics |
 | `inference/evaluate_explanations.py` | Reproducible diagnostic text metrics |
 | `predictions/` | Small completed JSONL results and metric summaries |
-| `DeepTraceReward_Paper_Sharing.pptx` | Latest edited paper-sharing deck |
+| `assets/presentation/DeepTraceReward_Paper_Sharing.pptx` | Latest edited paper-sharing deck |
 
 To regenerate the optional walkthrough, install Playwright, ensure Chrome or
 Chromium is available, and run `python record_explorer_demo.py`. The script uses
