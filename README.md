@@ -1,7 +1,9 @@
 # DeepTracerReward Explorer and lightweight baselines
 
-This repository is an applied-R&D companion to **“Learning Human-Perceived
-Fakeness in AI-Generated Videos via Multimodal LLMs.”** It provides:
+This repository is an applied-R&D companion to
+**[“Learning Human-Perceived Fakeness in AI-Generated Videos via Multimodal
+LLMs”](https://arxiv.org/pdf/2509.22646)** ([arXiv record](https://arxiv.org/abs/2509.22646)).
+It provides:
 
 - a local, FiftyOne-inspired explorer for the DeepTraceReward dataset;
 - strict evaluation for classification, spatial/temporal grounding, and
@@ -53,6 +55,16 @@ Open <http://127.0.0.1:8000>. The explorer supports dataset browsing, video and
 annotation detail, expert/model box overlays, prediction-agreement filters,
 dataset analytics, per-model performance, failure inspection, and explanation
 comparison. The full illustrated guide is [`readme.html`](readme.html).
+
+### Explorer walkthrough
+
+[![DeepTrace Explorer walkthrough preview](assets/slides/DeepTrace_Explorer_Demo.jpg)](assets/slides/DeepTrace_Explorer_Demo.mp4)
+
+Click the preview above or
+[open the MP4 walkthrough directly](assets/slides/DeepTrace_Explorer_Demo.mp4).
+It demonstrates matched and mismatched Track B/Track C predictions, expert and
+model bounding boxes, IoU inspection, dataset analytics, and model-performance
+pages.
 
 ## Environment and inference
 
