@@ -58,10 +58,10 @@ comparison. The full illustrated guide is [`readme.html`](readme.html).
 
 ### Explorer walkthrough
 
-[![DeepTrace Explorer walkthrough preview](assets/slides/DeepTrace_Explorer_Demo.jpg)](assets/slides/DeepTrace_Explorer_Demo.mp4)
+[![DeepTrace Explorer walkthrough preview](assets/slides/DeepTrace_Explorer_Demo.jpg)](https://raw.githubusercontent.com/MRAWAY77/DeepTracerReward/main/assets/slides/DeepTrace_Explorer_Demo.mp4)
 
 Click the preview above or
-[open the MP4 walkthrough directly](assets/slides/DeepTrace_Explorer_Demo.mp4).
+[open the MP4 walkthrough directly](https://raw.githubusercontent.com/MRAWAY77/DeepTracerReward/main/assets/slides/DeepTrace_Explorer_Demo.mp4).
 It demonstrates matched and mismatched Track B/Track C predictions, expert and
 model bounding boxes, IoU inspection, dataset analytics, and model-performance
 pages.
