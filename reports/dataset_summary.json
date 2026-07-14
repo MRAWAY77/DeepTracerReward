@@ -1,0 +1,133 @@
+{
+  "generated_at_utc": "2026-07-14T06:34:50.501602+00:00",
+  "dataset_root": ".",
+  "probe_mode": "all",
+  "totals": {
+    "physical_media_files": 6638,
+    "physical_bytes": 21243770323,
+    "annotation_rows": 7652,
+    "labeled_videos": 6636,
+    "fake_videos": 3318,
+    "real_videos": 3318,
+    "trace_annotations": 4334,
+    "written_trace_explanations": 2716,
+    "unmatched_media": 2,
+    "missing_media": 0,
+    "probed_files": 6638,
+    "probe_errors": 0
+  },
+  "regression_checks": {
+    "annotation_rows": true,
+    "labeled_videos": true,
+    "fake_videos": true,
+    "real_videos": true,
+    "trace_annotations": true,
+    "split_totals": true,
+    "no_missing_annotation_media": true
+  },
+  "distributions": {
+    "integrity": {
+      "annotation_matched": 6636,
+      "unmatched_media": 2
+    },
+    "collections": {
+      "real_video": 3318,
+      "fake_video": 3318,
+      "videos": 2
+    },
+    "splits_labeled_videos": {
+      "val": 664,
+      "test": 664,
+      "train": 5308
+    },
+    "sources_labeled_videos": {
+      "LLaVA-Video-178K_0_30_s_academic_v0_1": 3318,
+      "Pika 1.5": 1742,
+      "Kling 1.0": 829,
+      "Gen-3": 379,
+      "Kling 1.5": 171,
+      "Mochi 1": 94,
+      "MiniMax-Video-01": 75,
+      "Sora": 28
+    },
+    "resolutions_declared": {
+      "1296×720": 1742,
+      "1280×720": 1607,
+      "1920×1080": 957,
+      "480×270": 475,
+      "1280×768": 379,
+      "480×360": 351,
+      "640×480": 348,
+      "640×360": 300,
+      "848×480": 121,
+      "854×480": 90,
+      "500×375": 25,
+      "480×272": 23,
+      "720×480": 20,
+      "1440×1080": 20,
+      "480×320": 16,
+      "480×318": 16,
+      "568×320": 15,
+      "640×362": 14,
+      "1920×1440": 13,
+      "960×720": 10,
+      "540×360": 9,
+      "640×356": 8,
+      "2560×1920": 7,
+      "640×358": 5,
+      "854×478": 4,
+      "854×474": 4,
+      "480×268": 4,
+      "640×384": 3,
+      "640×352": 3,
+      "640×424": 3,
+      "854×470": 3,
+      "1920×1072": 3,
+      "600×360": 3,
+      "640×474": 2,
+      "654×480": 2,
+      "852×480": 2,
+      "3840×2160": 2,
+      "854×468": 2,
+      "600×480": 2,
+      "1280×640": 2,
+      "596×336": 2,
+      "490×360": 2,
+      "640×428": 1,
+      "640×430": 1,
+      "512×384": 1,
+      "638×360": 1,
+      "854×476": 1,
+      "648×480": 1,
+      "480×438": 1,
+      "480×266": 1,
+      "1276×720": 1,
+      "642×480": 1,
+      "636×360": 1,
+      "1270×720": 1,
+      "372×360": 1,
+      "544×360": 1,
+      "576×360": 1,
+      "1920×1088": 1,
+      "720×1280": 1
+    },
+    "video_codecs_probed": {
+      "h264": 6638
+    },
+    "audio_presence_probed": {
+      "True": 3329,
+      "False": 3309
+    }
+  },
+  "unmatched_paths": [
+    "videos/cm2p1ruq11fff0735253mt7p5.mp4",
+    "videos/cm2p1ruq11ffi0735t0isgegl.mp4"
+  ],
+  "missing_paths": [],
+  "notes": [
+    "Labels and splits come from all_data.json, not directory names alone.",
+    "Multiple fake trace rows are joined by video_id before video-level counts.",
+    "Codec/audio distributions cover probed files only unless --probe all is used.",
+    "Source videos are never hashed or modified by this audit."
+  ]
+}

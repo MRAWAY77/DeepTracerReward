@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Dependency-free DeepTraceReward dataset explorer."""
 from __future__ import annotations
-import argparse, json, math, mimetypes, re
+import argparse, errno, json, math, mimetypes, re
 from collections import Counter, defaultdict
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -9,8 +9,29 @@ from urllib.parse import parse_qs, unquote, urlparse
 from inference.explanation_metrics import evaluate_explanations
 from inference.evaluate_predictions import bbox_distance, iou, normalize_bbox
 
-ROOT = Path(__file__).resolve().parent
-STATIC = ROOT / "static"
+APP_ROOT = Path(__file__).resolve().parent
+ROOT = APP_ROOT
+STATIC = APP_ROOT / "static"
+
+
+def create_server(host, preferred_port, attempts):
+    """Bind to the requested port or the next available one."""
+    if not 0 <= preferred_port <= 65535:
+        raise SystemExit("--port must be between 0 and 65535")
+    if attempts < 1:
+        raise SystemExit("--port-attempts must be at least 1")
+    ports = [0] if preferred_port == 0 else range(preferred_port, min(65536, preferred_port + attempts))
+    last_error = None
+    for port in ports:
+        try:
+            server = ThreadingHTTPServer((host, port), Handler)
+            return server, int(server.server_address[1])
+        except OSError as exc:
+            if exc.errno != errno.EADDRINUSE:
+                raise
+            last_error = exc
+    final_port = min(65535, preferred_port + attempts - 1)
+    raise SystemExit(f"No available port in {preferred_port}-{final_port} on {host}: {last_error}")
 
 def paper_category(tags):
     text = " ".join(tags or []).lower(); out = []
@@ -26,6 +47,10 @@ def paper_category(tags):
 
 class Dataset:
     def __init__(self, path):
+        if not path.is_file():
+            raise SystemExit(
+                f"Missing {path}. Download RewardData as documented in README.md."
+            )
         raw = json.loads(path.read_text(encoding="utf-8")); self.rows=[]; self.by_video=defaultdict(list)
         for i, row in enumerate(raw):
             r=dict(row); r["_index"]=i; r["paper_categories"]=paper_category(r.get("faketrace_check_applies"))
@@ -70,7 +95,7 @@ class Dataset:
                 "duration_bins":{name:sum((lo<d<=hi) if lo else d<=hi for d in durations) for name,lo,hi in bins},"annotations_per_fake_video":dict(sorted(Counter(v["annotation_count"] for v in fv).items())),
                 "release_notes":{"uncategorized_annotations":len(fake)-tagged,"category_mapping":"Raw Labelbox tags mapped heuristically to the paper's nine-category taxonomy; categories are multi-label."}}
 
-DATA=Dataset(ROOT/"all_data.json")
+DATA=None
 class Predictions:
     def __init__(self): self.signature=None; self.models={}; self.by_key={}
     def refresh(self):
@@ -137,7 +162,7 @@ class Predictions:
 PREDICTIONS=Predictions()
 class Handler(SimpleHTTPRequestHandler):
     def send_json(self,value,status=200):
-        body=json.dumps(value,ensure_ascii=False).encode(); self.send_response(status); self.send_header("Content-Type","application/json; charset=utf-8"); self.send_header("Content-Length",str(len(body))); self.end_headers(); self.wfile.write(body)
+        body=json.dumps(value,ensure_ascii=False).encode(); self.send_response(status); self.send_header("Content-Type","application/json; charset=utf-8"); self.send_header("Content-Length",str(len(body))); self.send_header("Cache-Control","no-store"); self.end_headers(); self.wfile.write(body)
     def do_GET(self):
         p=urlparse(self.path)
         if p.path=="/api/videos":
@@ -162,8 +187,11 @@ class Handler(SimpleHTTPRequestHandler):
         self.path="/index.html" if p.path=="/" else p.path; return super().do_GET()
     def translate_path(self,path):
         clean=urlparse(path).path.lstrip("/")
-        base=ROOT if clean=="readme.html" or clean.startswith(("videos/","real_videos/")) else STATIC
-        return str(base/clean)
+        base=ROOT if clean=="readme.html" or clean.startswith(("videos/","real_videos/","reports/")) else STATIC
+        target=(base/clean).resolve()
+        if target!=base and base not in target.parents:
+            return str(STATIC/"__not_found__")
+        return str(target)
     def send_media(self, target):
         size=target.stat().st_size; start,end=0,size-1; partial=False
         header=self.headers.get("Range","")
@@ -189,6 +217,22 @@ class Handler(SimpleHTTPRequestHandler):
                 remaining-=len(chunk)
     def log_message(self,fmt,*args): print(f"[{self.log_date_time_string()}] {fmt%args}")
 def main():
-    ap=argparse.ArgumentParser(); ap.add_argument("--host",default="127.0.0.1"); ap.add_argument("--port",type=int,default=8000); a=ap.parse_args()
-    print(f"Loaded {len(DATA.videos):,} videos and {len(DATA.rows):,} rows\nOpen http://{a.host}:{a.port}"); ThreadingHTTPServer((a.host,a.port),Handler).serve_forever()
+    global ROOT, DATA, PREDICTIONS
+    ap=argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--root", default=str(APP_ROOT), help="RewardData root (default: app.py directory)")
+    ap.add_argument("--host",default="127.0.0.1")
+    ap.add_argument("--port",type=int,default=8000,help="preferred port; use 0 for any free port")
+    ap.add_argument("--port-attempts",type=int,default=100,help="consecutive ports to try (default: 100)")
+    a=ap.parse_args()
+    ROOT=Path(a.root).expanduser().resolve()
+    DATA=Dataset(ROOT/"all_data.json")
+    PREDICTIONS=Predictions()
+    server,port=create_server(a.host,a.port,a.port_attempts)
+    print(f"Loaded {len(DATA.videos):,} videos and {len(DATA.rows):,} rows")
+    if port!=a.port and a.port!=0: print(f"Port {a.port} is occupied; using {port} instead")
+    print(f"Open http://{a.host}:{port}")
+    try:
+        with server: server.serve_forever()
+    except KeyboardInterrupt:
+        print("\nExplorer stopped")
 if __name__=="__main__": main()

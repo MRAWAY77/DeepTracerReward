@@ -3,10 +3,10 @@
 <style>:root{--bg:#0d1117;--panel:#151b25;--line:#303848;--text:#dce3ed;--muted:#9aa7b8;--green:#6ee7b7;--red:#fb7185;--amber:#fbbf24}*{box-sizing:border-box}body{max-width:1100px;margin:40px auto;padding:0 22px;background:var(--bg);color:var(--text);font:16px/1.62 system-ui}h1,h2,h3{color:#fff;line-height:1.25}h2{margin-top:42px;border-bottom:1px solid var(--line);padding-bottom:8px}a{color:var(--green)}code,pre{background:#171d27;border:1px solid var(--line);border-radius:7px}code{padding:2px 5px}pre{padding:15px;overflow:auto}.hero,.note,.warning,.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px}.hero{border-left:4px solid var(--green)}.note{border-left:4px solid var(--green)}.warning{border-left:4px solid var(--amber)}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}.card b{display:block;font-size:25px;color:#fff}.card span,.muted{color:var(--muted);font-size:13px}table{border-collapse:collapse;width:100%;display:block;overflow-x:auto}td,th{border:1px solid var(--line);padding:9px 11px;text-align:left;white-space:nowrap}th{background:#171d27}td.best{color:var(--green);font-weight:bold}td.bad{color:var(--red)}ul,ol{padding-left:24px}@media(max-width:650px){body{margin-top:20px}.grid{grid-template-columns:1fr 1fr}}</style></head><body>
 <h1>DeepTrace Explorer</h1>
 <div class="hero"><b>Local dataset visualizer and lightweight zero-shot video-VLM benchmark.</b> It joins every real and generated clip with metadata, expert fake-trace annotations, model responses, deterministic localization scores, and reference-text diagnostics.</div>
-<p class="muted"><b>Guide version:</b> completed Track B + Track C results · updated 13 July 2026</p>
+<p class="muted"><b>Guide version:</b> completed Track B + Track C results and shared audit workflow · updated 14 July 2026</p>
 
 <h2>Run the visualizer</h2><pre>conda activate deeptracereward
-python app.py</pre><p>Open <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>. Use <code>python app.py --port 8080</code> if port 8000 is occupied. The visualizer itself uses only the Python standard library; inference dependencies are separate.</p>
+python app.py</pre><p>Open the URL printed by the launcher. It prefers <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a> and automatically tries later ports when 8000 is occupied. The interface and default launch command are unchanged; inference dependencies are separate.</p><p>Refresh the reproducible technical profile with <code>python tools/dataset_audit.py . --probe all</code>. Outputs: <a href="/reports/dataset_audit.html">technical audit</a>, <a href="/reports/dataset_summary.json">aggregate JSON</a>, and <a href="/reports/dataset_manifest.jsonl">per-video JSONL manifest</a>.</p>
 
 <h2>What the interface can do</h2><table><tr><th>Page</th><th>Capability</th></tr>
 <tr><td>Explore</td><td>Browse all 6,636 unique videos; search IDs/prompts/sources; filter real/fake, split, generator, category, human-explanation availability, and typical/atypical model responses.</td></tr>
@@ -17,7 +17,7 @@ python app.py</pre><p>Open <a href="http://127.0.0.1:8000">http://127.0.0.1:8000
 
 <h2>Dataset at a glance</h2><div class="grid">
 <div class="card"><span>Unique videos</span><b>6,636</b>3,318 fake + 3,318 real</div><div class="card"><span>JSON rows</span><b>7,652</b>Repeated rows represent traces</div><div class="card"><span>Expert traces</span><b>4,334</b>Across 3,318 generated videos</div><div class="card"><span>Written explanations</span><b>62.7%</b>2,716 trace explanations</div><div class="card"><span>Average video</span><b>5.78 s</b>Length-matched real controls</div><div class="card"><span>Test split</span><b>664</b>332 fake + 332 real</div></div>
-<p>The fake collection spans Pika 1.5, Kling 1.0/1.5, Gen-3, Mochi 1, MiniMax-Video-01, and Sora. Real controls come from LLaVA-Video-178K and were clipped to match the fake-video length distribution. The official unique-video split is 5,308 train, 664 validation, and 664 test.</p>
+<p>The fake collection spans Pika 1.5, Kling 1.0/1.5, Gen-3, Mochi 1, MiniMax-Video-01, and Sora. Real controls come from LLaVA-Video-178K and were clipped to match the fake-video length distribution. The official unique-video split is 5,308 train, 664 validation (stored as <code>val</code>), and 664 test.</p>
 
 <h2>Why the annotations are valuable</h2><p>This is substantially richer supervision than a binary real/fake label. An expert trace can identify <em>what</em> looked fake, <em>where</em> it appeared, and <em>when</em> it began and ended. A generated video can have multiple traces: 753 videos have two or more, with up to six traces on one video.</p>
 <ul><li>Experts performed frame-by-frame inspection in Labelbox and supplied temporally aware boxes, onset/offset, structured artifact tags, and natural-language descriptions.</li><li>Ambiguous cases were resolved collaboratively by majority consensus.</li><li>Each annotated video was reviewed by one or two additional annotators for cross-validation and bias reduction.</li><li>The source videos were manually filtered for high visual quality and meaningful motion, avoiding trivially degraded clips.</li><li>The released explanations were GPT-4-standardized to reduce linguistic inconsistency.</li></ul>
@@ -73,6 +73,8 @@ python inference/evaluate_explanations.py predictions/qwen2.5-vl-3b-v2-test.json
 ├── app.py
 ├── all_data.json
 ├── readme.html
+├── tools/dataset_audit.py
+├── reports/
 ├── inference/
 ├── predictions/*.jsonl
 ├── static/index.html

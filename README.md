@@ -44,7 +44,41 @@ RewardData/
 The annotation JSON contains 7,652 rows representing 6,636 unique videos:
 3,318 generated and 3,318 real. A generated video may have several expert trace
 annotations, so all splitting and evaluation must use `video_id`, never row index.
-The official test split contains 664 unique videos: 332 fake and 332 real.
+The official test split contains 664 unique videos: 332 fake and 332 real. The
+release encodes the validation split with the literal value `val`.
+
+## Refresh the dataset audit
+
+This repository specializes the shared `profile-media-dataset` workflow for
+DeepTraceReward. It keeps the annotation join and movement-trace semantics local
+while reusing the baseline's manifest, integrity, technical-probe, reporting,
+safe-streaming, and launcher-validation approach.
+
+Generate a quick representative technical audit:
+
+```bash
+conda activate deeptracereward
+python tools/dataset_audit.py . --probe sample
+```
+
+For a release-quality refresh that probes every physical video:
+
+```bash
+python tools/dataset_audit.py . --probe all --probe-workers 8
+```
+
+Outputs:
+
+- [`reports/dataset_manifest.jsonl`](reports/dataset_manifest.jsonl) — one row
+  per physical or missing video;
+- [`reports/dataset_summary.json`](reports/dataset_summary.json) — aggregate
+  counts, distributions, integrity findings, and regression checks;
+- [`reports/dataset_audit.html`](reports/dataset_audit.html) — self-contained
+  technical report.
+
+The audit preserves unmatched files rather than assigning invented labels. The
+current download contains 6,638 physical MP4s: 6,636 join to annotations and two
+additional files under `videos/` are explicitly marked `unmatched_media`.
 
 ## Run the explorer
 
@@ -57,6 +91,11 @@ Open <http://127.0.0.1:8000>. The explorer supports dataset browsing, video and
 annotation detail, expert/model box overlays, prediction-agreement filters,
 dataset analytics, per-model performance, failure inspection, and explanation
 comparison. The full illustrated guide is [`readme.html`](readme.html).
+
+The launcher still prefers port 8000. If it is occupied, it now tries subsequent
+ports automatically and prints the selected URL. Optional controls are
+`--root`, `--port`, and `--port-attempts`; the original `python app.py` workflow
+and interface are unchanged.
 
 ### Explorer walkthrough
 
@@ -122,6 +161,9 @@ it is not a valid benchmark result.
 | Path | Purpose |
 |---|---|
 | `app.py`, `static/index.html` | Local explorer server and interface |
+| `tools/dataset_audit.py` | RewardData manifest and technical-audit generator |
+| `skills/profile-media-dataset/SKILL.md` | Dataset-specific shared-skill specialization |
+| `reports/` | Generated manifest, summary, and technical HTML audit |
 | `inference/run_vlm.py` | Resume-safe Track C inference |
 | `inference/run_track_b.py` | Resume-safe Track B orchestration |
 | `inference/track_b_worker.py` | Isolated TruFor/IML-ViT adapters |
