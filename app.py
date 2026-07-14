@@ -14,6 +14,17 @@ ROOT = APP_ROOT
 STATIC = APP_ROOT / "static"
 
 
+def json_safe(value):
+    """Replace non-finite floats recursively so API JSON stays standards-compliant."""
+    if isinstance(value, float):
+        return value if math.isfinite(value) else None
+    if isinstance(value, dict):
+        return {key: json_safe(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [json_safe(item) for item in value]
+    return value
+
+
 def create_server(host, preferred_port, attempts):
     """Bind to the requested port or the next available one."""
     if not 0 <= preferred_port <= 65535:
@@ -162,7 +173,7 @@ class Predictions:
 PREDICTIONS=Predictions()
 class Handler(SimpleHTTPRequestHandler):
     def send_json(self,value,status=200):
-        body=json.dumps(value,ensure_ascii=False).encode(); self.send_response(status); self.send_header("Content-Type","application/json; charset=utf-8"); self.send_header("Content-Length",str(len(body))); self.send_header("Cache-Control","no-store"); self.end_headers(); self.wfile.write(body)
+        body=json.dumps(json_safe(value),ensure_ascii=False,allow_nan=False).encode(); self.send_response(status); self.send_header("Content-Type","application/json; charset=utf-8"); self.send_header("Content-Length",str(len(body))); self.send_header("Cache-Control","no-store"); self.end_headers(); self.wfile.write(body)
     def do_GET(self):
         p=urlparse(self.path)
         if p.path=="/api/videos":
